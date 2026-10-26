@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Text to Speech App</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #15c09b;
+            color: rgba(255, 255, 255, 0);
+            text-align: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 650px;
+            margin: 40px auto;
+            padding: 25px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        textarea {
+            width: 100%;
+            height: 180px;
+            padding: 10px;
+            box-sizing: border-box;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        select, input, button {
+            margin-top: 12px;
+            padding: 10px;
+            font-size: 15px;
+        }
+
+        button {
+            background-color: #1565c0;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0d47a1;
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px;
+            color: #555;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Text to Speech App</h1>
+        <p>Convert written text into spoken words</p>
+    </header>
+
+    <div class="container">
+
+        <h2>Enter Your Text</h2>
+
+        <textarea id="textInput"
+            placeholder="Type or paste your text here..."></textarea>
+
+        <br>
+
+        <label for="voiceSelect">Choose Voice:</label>
+        <select id="voiceSelect">
+            <option value="">Default Voice</option>
+        </select>
+
+        <br>
+
+        <label for="rate">Speaking Speed:</label>
+        <input type="range" id="rate"
+            min="0.5" max="2" step="0.1" value="1">
+
+        <span id="rateValue">1</span>
+
+        <br>
+
+        <button onclick="speakText()">Speak</button>
+        <button onclick="pauseSpeech()">Pause</button>
+        <button onclick="resumeSpeech()">Resume</button>
+        <button onclick="stopSpeech()">Stop</button>
+
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Text to Speech App</p>
+    </footer>
+
+    <script>
+        const textInput = document.getElementById("textInput");
+        const voiceSelect = document.getElementById("voiceSelect");
+        const rateInput = document.getElementById("rate");
+        const rateValue = document.getElementById("rateValue");
+
+        let voices = [];
+
+        function loadVoices() {
+            voices = speechSynthesis.getVoices();
+            const previousVoice = voiceSelect.value;
+
+            voiceSelect.innerHTML =
+                '<option value="">Default Voice</option>';
+
+            voices.forEach((voice, index) => {
+                const option = document.createElement("option");
+                option.value = index;
+                option.textContent =
+                    voice.name + " (" + voice.lang + ")";
+                voiceSelect.appendChild(option);
+            });
+
+            if (previousVoice !== "" &&
+                Number(previousVoice) < voices.length) {
+                voiceSelect.value = previousVoice;
+            }
+        }
+
+        loadVoices();
+        speechSynthesis.onvoiceschanged = loadVoices;
+
+        function speakText() {
+            const text = textInput.value.trim();
+
+            if (text === "") {
+                alert("Please enter some text first.");
+                return;
+            }
+
+            speechSynthesis.cancel();
+
+            const speech = new SpeechSynthesisUtterance(text);
+
+            speech.rate = Number(rateInput.value);
+
+            if (voiceSelect.value !== "") {
+                speech.voice = voices[Number(voiceSelect.value)];
+            }
+
+            speechSynthesis.speak(speech);
+        }
+
+        function pauseSpeech() {
+            speechSynthesis.pause();
+        }
+
+        function resumeSpeech() {
+            speechSynthesis.resume();
+        }
+
+        function stopSpeech() {
+            speechSynthesis.cancel();
+        }
+
+        rateInput.addEventListener("input", function() {
+            rateValue.textContent = rateInput.value;
+        });
+    </script>
+
+</body>
+</html>
